@@ -41,6 +41,9 @@ namespace mh
         
         void setSize(unsigned int width, unsigned int height);
         void setPosition(unsigned int x, unsigned int y);
+        void setCursorMode(const Mouse::CursorMode& cursor);
+        
+        Mouse::CursorMode getCursorMode();
         
 #if defined(MINEH_WINDOW_API_GLFW)
         static void callback_GLFWmousebuttonfun(GLFWwindow *, int, int, int);
@@ -55,11 +58,14 @@ namespace mh
         static void callback_GLFWwindowclosefun(GLFWwindow *);
         static void callback_GLFWwindowrefreshfun(GLFWwindow *);
         static void callback_GLFWwindowfocusfun(GLFWwindow *, int);
-        static void callback_GLFWwindowiconifyfun(GLFWwindow *, int);
         static void callback_GLFWwindowmaximizefun(GLFWwindow *, int);
         static void callback_GLFWframebuffersizefun(GLFWwindow *, int, int);
         static void callback_GLFWwindowcontentscalefun(GLFWwindow *, float, float);
+#if defined(__APPLE__) && defined(TARGET_OS_OSX)
         static void callback_GLFWwindowocclusionfun(GLFWwindow *, int);
+#else
+        static void callback_GLFWwindowiconifyfun(GLFWwindow *, int);
+#endif
 #endif
     };
 }

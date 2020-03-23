@@ -8,6 +8,9 @@
 
 #include "Vulkan.hpp"
 
+#include <unordered_map>
+#include <tiny_obj_loader.h>
+
 namespace mh
 {
 #pragma mark -
@@ -93,7 +96,7 @@ namespace mh
         return std::make_pair(graphicsQueue, presentQueue);
     }
 
-    std::vector<const char*> getRequiredExtensions()
+    std::vector<const char*> getRequiredExtensions(const bool& enableValidationLayers)
     {
 #ifdef MINEH_WINDOW_API_GLFW
         uint32_t glfwExtensionCount = 0;
@@ -102,7 +105,7 @@ namespace mh
 
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 #endif
-        if (mhs::enableValidationLayers) extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        if (enableValidationLayers) extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
         return extensions;
     }
@@ -119,6 +122,44 @@ namespace mh
         
         return data;
     }
+
+    void loadModel(const std::string& MODEL_NAME, std::vector<Vertex<glm::vec3>>& vertices, std::vector<uint32_t>& indices)
+    {
+        if (MODEL_NAME.length() == 0) return;
+        
+        tinyobj::attrib_t attrib;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string warn, err;
+        
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_NAME.c_str())) throw std::runtime_error("loadModel() failed: " + warn + err);
+        
+        std::unordered_map<Vertex<glm::vec3>, uint32_t> uniqueVertices = {};
+        
+        for (const auto& shape : shapes)
+        {
+            for (const auto& index : shape.mesh.indices)
+            {
+                Vertex<glm::vec3> vertex;
+                
+                vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+                };
+
+                vertex.uv = {
+                          attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.f - attrib.texcoords[2 * index.texcoord_index + 1]
+                };
+                
+                if (uniqueVertices.count(vertex) == 0) {
+                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                    vertices.push_back(vertex); }
+                indices.push_back(uniqueVertices[vertex]);
+            }
+        }
+    } 
 
     bool hasStencilComponent(VkFormat format) { return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT; }
 }

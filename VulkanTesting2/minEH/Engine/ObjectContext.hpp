@@ -22,10 +22,9 @@ using std::endl;
 #include <unordered_map>
 
 #include <vulkan/vulkan.h>
-#include <glm/glm.hpp>
+#include <glm/fwd.hpp>
 
-#include "../Vertex.hpp"
-
+#include "Vertex.hpp"
 #include "Context.hpp"
 
 namespace mh
@@ -37,7 +36,7 @@ namespace mh
     {
         Context* context = nullptr;
         
-        std::vector<Vertex> vertices;
+        std::vector<Vertex<glm::vec3>> vertices;
         std::vector<uint32_t> indices;
         
         VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;

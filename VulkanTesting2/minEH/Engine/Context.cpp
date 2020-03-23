@@ -8,6 +8,8 @@
 
 #include "Context.hpp"
 
+#include <stb_image.h>
+
 namespace mh
 {
 
@@ -42,23 +44,13 @@ namespace mh
     {
         cout << "recreate try..." << endl;
         
-        WindowSize size = window->getSize();
-        // while (size.width == 0 || size.height == 0) { size = window->getSize(); window->waitEvents(); }
-        // while (framebufferIconified) window->waitEvents();
-        
         vkDeviceWaitIdle(device);
         
+        WindowSize size = window->getSize();
         if (lastSize.width != size.width || lastSize.height != size.height)
         {
             freeImage(colorImage);
             freeImage(depthImage);
-            
-            /*vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-            for (int i = 0; i < uniformBuffers.size(); ++i)
-                cleanBuffer(uniformBuffers[i], uniformBufferMemory[i]);
-             
-            vkDestroyPipeline(device, graphicsPipeline, nullptr);
-            vkDestroyPipelineLayout(device, pipelineLayout, nullptr);*/
             
             for (auto& f : framebuffer) vkDestroyFramebuffer(device, f, nullptr);
             vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
@@ -66,32 +58,16 @@ namespace mh
             for (auto& imageView : swapchainImageViews) vkDestroyImageView(device, imageView, nullptr);
             // vkDestroySwapchainKHR(device, swapchain, nullptr);
             
-            
             createSwapchain();
             createColorImage();
             createDepthImage();
             createRenderPass();
             createFramebuffers();
-            
-            /*createUniformBuffers();
-            createDescriptorPool();
-            createDescriptorSets();*/
-            
-            /*mesh.swapChainExtent = swapChainExtent;
-            mesh.renderPass = renderPass;
-            mesh.swapchainImages_size = swapchainImages.size();
-            mesh.recreateSwapchain();*/
-            
-            // createGraphicsPipeline();
             createCommandBuffer();
             
             lastSize.width = size.width;
             lastSize.height = size.height;
-            
-            // TODO: recreate of other objects here
         }
-        
-        framebufferResized = false;
         
         cout << "done" << endl;
     }
@@ -100,21 +76,12 @@ namespace mh
         freeImage(colorImage);
         freeImage(depthImage);
         
-        /*vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-        for (int i = 0; i < uniformBuffers.size(); ++i)
-            cleanBuffer(uniformBuffers[i], uniformBufferMemory[i]);
-         
-        vkDestroyPipeline(device, graphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);*/
-        
         for (auto& f : framebuffer) vkDestroyFramebuffer(device, f, nullptr);
         vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
         vkDestroyRenderPass(device, renderPass, nullptr);
         for (auto& imageView : swapchainImageViews) vkDestroyImageView(device, imageView, nullptr);
         vkDestroySwapchainKHR(device, swapchain, nullptr);
         
-        
-        // vkDestroyDescriptorSetLayout(device, descriptorLayout, nullptr);
         
         for (int i = 0; i < renderFinishedSemaphore.size(); ++i)
         {
@@ -125,7 +92,7 @@ namespace mh
         vkDestroyCommandPool(device, commandPool, nullptr);
         vkDestroyCommandPool(device, shortPool, nullptr);
         vkDestroyDevice(device, nullptr);
-        if (mhs::enableValidationLayers)
+        if (enableValidationLayers)
             DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
         vkDestroySurfaceKHR(instance, surface, nullptr);
         vkDestroyInstance(instance, nullptr);
@@ -136,7 +103,7 @@ namespace mh
 
     void Context::createInstance()
     {
-        if (mhs::enableValidationLayers && !checkValidationLayerSupport())
+        if (enableValidationLayers && !checkValidationLayerSupport())
             throw std::runtime_error("validation layers requested, but not available!");
         
         VkApplicationInfo applicationInfo = { VK_STRUCTURE_TYPE_APPLICATION_INFO };
@@ -151,14 +118,14 @@ namespace mh
         createInfo.flags = 0;
         createInfo.pApplicationInfo = &applicationInfo;
         
-        auto extensions = getRequiredExtensions();
+        auto extensions = getRequiredExtensions(enableValidationLayers);
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
         createInfo.ppEnabledExtensionNames = extensions.data();
         
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-        if (mhs::enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(mhs::validationLayers.size());
-            createInfo.ppEnabledLayerNames = mhs::validationLayers.data();
+        if (enableValidationLayers) {
+            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+            createInfo.ppEnabledLayerNames = validationLayers.data();
 
             populateDebugMessengerCreateInfo(debugCreateInfo);
             createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
@@ -242,9 +209,9 @@ namespace mh
         createInfo.flags = 0;
         createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
         createInfo.pQueueCreateInfos = queueInfos.data();
-        if (mhs::enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(mhs::validationLayers.size());
-            createInfo.ppEnabledLayerNames = mhs::validationLayers.data();
+        if (enableValidationLayers) {
+            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+            createInfo.ppEnabledLayerNames = validationLayers.data();
         } else createInfo.enabledLayerCount = 0;
         std::vector<const char*> extentions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extentions.size());
@@ -278,7 +245,7 @@ namespace mh
         std::vector<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
         
-        for (const char* layerName : mhs::validationLayers)
+        for (const char* layerName : validationLayers)
         {
             bool layerFound = false;
             for (const auto& layerProperties : availableLayers)
@@ -301,7 +268,7 @@ namespace mh
     }
     void Context::setupDebugMessenger()
     {
-        if (!mhs::enableValidationLayers) return;
+        if (!enableValidationLayers) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         populateDebugMessengerCreateInfo(createInfo);
@@ -375,6 +342,7 @@ namespace mh
         
         swapChainProps.format = chooseSwapSurfaceFormat();
         swapChainProps.extent = chooseSwapExtent2D(capabilities, 0, 0);
+        swapChainProps.aspect = (float)swapChainProps.extent.width/swapChainProps.extent.height;
         
         VkSwapchainCreateInfoKHR createInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
         createInfo.pNext = nullptr;
@@ -551,9 +519,9 @@ namespace mh
     {
         VkSemaphoreCreateInfo createInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
         
-        imageAvailableSemaphore.resize(mhs::MAX_FRAMES_IN_FLIGHT);
-        renderFinishedSemaphore.resize(mhs::MAX_FRAMES_IN_FLIGHT);
-        inFlightFences.resize(mhs::MAX_FRAMES_IN_FLIGHT);
+        imageAvailableSemaphore.resize(MAX_FRAMES_IN_FLIGHT);
+        renderFinishedSemaphore.resize(MAX_FRAMES_IN_FLIGHT);
+        inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
         imagesInFlight.resize(swapchainImages.size(), VK_NULL_HANDLE);
         
         VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
@@ -586,6 +554,242 @@ namespace mh
         if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) throw std::runtime_error("loadShaders() failed!");
         return shaderModule;
     }
+
+    std::pair<VkPipeline, VkPipelineLayout> Context::generateDefaultPipeline(VkShaderModule& vertexShader, VkShaderModule& fragmentShader, std::vector<VkVertexInputAttributeDescription>& vAttributeDescription, VkVertexInputBindingDescription& vBindingDescription, Descriptor* descriptor, bool depthEnabled, const VkPolygonMode& polygonMode, const VkCullModeFlags& cullMode, const VkFrontFace& frontFace)
+    {
+        VkPipelineShaderStageCreateInfo vertexStageInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+        vertexStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertexStageInfo.module = vertexShader;
+        vertexStageInfo.pName = "main";
+        
+        VkPipelineShaderStageCreateInfo fragmentStageInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+        fragmentStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragmentStageInfo.module = fragmentShader;
+        fragmentStageInfo.pName = "main";
+        
+        std::vector<VkPipelineShaderStageCreateInfo> vStages = { vertexStageInfo, fragmentStageInfo };
+
+        
+        VkPipelineVertexInputStateCreateInfo inputStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
+        inputStateInfo.vertexBindingDescriptionCount = 1;
+        inputStateInfo.pVertexBindingDescriptions = &vBindingDescription;
+        inputStateInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vAttributeDescription.size());
+        inputStateInfo.pVertexAttributeDescriptions = vAttributeDescription.data();
+        
+        
+        VkPipelineInputAssemblyStateCreateInfo assemblyStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
+        assemblyStateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        assemblyStateInfo.primitiveRestartEnable = false;
+        
+        
+        VkViewport viewport;
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.width = swapChainProps.extent.width;
+        viewport.height = swapChainProps.extent.height;
+        viewport.minDepth = 0;
+        viewport.maxDepth = 1.f;
+        
+        VkRect2D scissors;
+        scissors.offset = { 0, 0 };
+        scissors.extent = swapChainProps.extent;
+        
+        VkPipelineViewportStateCreateInfo viewportStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
+        viewportStateInfo.viewportCount = 1;
+        viewportStateInfo.pViewports = &viewport;
+        viewportStateInfo.scissorCount = 1;
+        viewportStateInfo.pScissors = &scissors;
+        
+        
+        VkPipelineRasterizationStateCreateInfo rasterizationStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
+        rasterizationStateInfo.depthClampEnable = false;
+        rasterizationStateInfo.rasterizerDiscardEnable = false;
+        rasterizationStateInfo.polygonMode = polygonMode;
+        rasterizationStateInfo.cullMode = cullMode;
+        rasterizationStateInfo.frontFace = frontFace;
+        rasterizationStateInfo.depthBiasEnable = false;
+        rasterizationStateInfo.depthBiasConstantFactor = 0;
+        rasterizationStateInfo.depthBiasClamp = 0;
+        rasterizationStateInfo.depthBiasSlopeFactor = 0;
+        rasterizationStateInfo.lineWidth = 1.f;
+        
+        
+        VkPipelineMultisampleStateCreateInfo multisampleStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO };
+        multisampleStateInfo.rasterizationSamples = getMaxUsableSampleCount();
+        multisampleStateInfo.sampleShadingEnable = true;
+        multisampleStateInfo.minSampleShading = 1.f;
+        multisampleStateInfo.pSampleMask = nullptr;
+        multisampleStateInfo.alphaToCoverageEnable = false;
+        multisampleStateInfo.alphaToOneEnable = false;
+        
+        
+        VkPipelineDepthStencilStateCreateInfo depthStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
+        depthStateInfo.depthTestEnable = depthEnabled;
+        depthStateInfo.depthWriteEnable = depthEnabled;
+        depthStateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+        depthStateInfo.depthBoundsTestEnable = false;
+        depthStateInfo.stencilTestEnable = false;
+        depthStateInfo.front.failOp = VK_STENCIL_OP_KEEP;
+        depthStateInfo.front.passOp = VK_STENCIL_OP_KEEP;
+        depthStateInfo.front.compareOp = VK_COMPARE_OP_ALWAYS;
+        depthStateInfo.back = depthStateInfo.front;
+        depthStateInfo.minDepthBounds = 0;
+        depthStateInfo.maxDepthBounds = 1;
+        
+        
+        VkPipelineColorBlendAttachmentState attachmentState = {};
+        attachmentState.blendEnable = false;
+        attachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        attachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        attachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+        attachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        attachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        attachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+        attachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        
+        VkPipelineColorBlendStateCreateInfo colorBlendStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
+        colorBlendStateInfo.logicOpEnable = false;
+        colorBlendStateInfo.logicOp = VK_LOGIC_OP_COPY;
+        colorBlendStateInfo.attachmentCount = 1;
+        colorBlendStateInfo.pAttachments = &attachmentState;
+        colorBlendStateInfo.blendConstants[0] = 0.f;
+        colorBlendStateInfo.blendConstants[1] = 0.f;
+        colorBlendStateInfo.blendConstants[2] = 0.f;
+        colorBlendStateInfo.blendConstants[3] = 0.f;
+        
+        
+        VkPipelineDynamicStateCreateInfo dynamicStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
+        dynamicStateInfo.dynamicStateCount = 0;
+        dynamicStateInfo.pDynamicStates = nullptr;
+        
+        
+        VkPipelineLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+        layoutInfo.setLayoutCount = descriptor ? 1 : 0;
+        layoutInfo.pSetLayouts = descriptor ? &descriptor->layout : nullptr;
+        layoutInfo.pushConstantRangeCount = 0;
+        layoutInfo.pPushConstantRanges = nullptr;
+        
+        VkPipelineLayout pipelineLayout;
+        if (vkCreatePipelineLayout(device, &layoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+            throw std::runtime_error("vkCreatePipelineLayout() failed!");
+        
+        
+        VkGraphicsPipelineCreateInfo createInfo = { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
+        createInfo.stageCount = static_cast<uint32_t>(vStages.size());
+        createInfo.pStages = vStages.data();
+        createInfo.pVertexInputState = &inputStateInfo;
+        createInfo.pInputAssemblyState = &assemblyStateInfo;
+        createInfo.pTessellationState = nullptr;
+        createInfo.pViewportState = &viewportStateInfo;
+        createInfo.pRasterizationState = &rasterizationStateInfo;
+        createInfo.pMultisampleState = &multisampleStateInfo;
+        createInfo.pDepthStencilState = &depthStateInfo;
+        createInfo.pColorBlendState = &colorBlendStateInfo;
+        createInfo.pDynamicState = &dynamicStateInfo;
+        createInfo.layout = pipelineLayout;
+        createInfo.renderPass = renderPass;
+        createInfo.subpass = 0;
+        createInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
+        createInfo.basePipelineIndex = -1; // Optional
+        
+        VkPipeline graphicsPipeline;
+        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &createInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) throw std::runtime_error("createGraphicsPipeline() failed!");
+        return std::make_pair(graphicsPipeline, pipelineLayout);
+    }
+
+    void Context::generateDefaultVertexAndIndexBuffers(const VkDeviceSize &bufferSizeV, Buffer &vertexBuffer, const void* vertexData, const VkDeviceSize &bufferSizeI, Buffer &indexBuffer, const void* indexData)
+    {
+        Buffer stagingVertex, stagingIndex;
+        
+        createBuffer(bufferSizeV, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingVertex.buffer, stagingVertex.memory.memory);
+        createBuffer(bufferSizeI, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingIndex.buffer, stagingIndex.memory.memory);
+        
+        void* data;
+        vkMapMemory(device, stagingVertex.memory.memory, 0, bufferSizeV, 0, &data);
+            memcpy(data, vertexData, (size_t) bufferSizeV);
+        vkUnmapMemory(device, stagingVertex.memory.memory);
+        
+        vkMapMemory(device, stagingIndex.memory.memory, 0, bufferSizeI, 0, &data);
+            memcpy(data, indexData, (size_t) bufferSizeI);
+        vkUnmapMemory(device, stagingIndex.memory.memory);
+        
+        createBuffer(bufferSizeV, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer.buffer, vertexBuffer.memory.memory);
+        createBuffer(bufferSizeI, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer.buffer, indexBuffer.memory.memory);
+        
+        VkCommandBuffer cmdBuffer = beginSingleTimeCommands();
+        
+            VkBufferCopy regions;
+            regions.srcOffset = 0;
+            regions.dstOffset = 0;
+            regions.size = bufferSizeV;
+            vkCmdCopyBuffer(cmdBuffer, stagingVertex.buffer, vertexBuffer.buffer, 1, &regions);
+            
+            VkBufferCopy regions2;
+            regions2.srcOffset = 0;
+            regions2.dstOffset = 0;
+            regions2.size = bufferSizeI;
+            vkCmdCopyBuffer(cmdBuffer, stagingIndex.buffer, indexBuffer.buffer, 1, &regions2);
+        
+        endSingleTimeCommands(cmdBuffer);
+        
+        freeBuffer(stagingVertex);
+        freeBuffer(stagingIndex);
+    }
+
+    Texture Context::generateTexture(const std::string &textureName, uint32_t maxMipLevels)
+    {
+        Texture texture;
+        
+        int width, height, comp;
+        stbi_uc* pixels = stbi_load(textureName.c_str(), &width, &height, &comp, STBI_rgb_alpha);
+        texture.image.width = static_cast<uint32_t>(width); texture.image.height = static_cast<uint32_t>(height);
+        if (maxMipLevels == 0)
+            texture.mip = static_cast<uint32_t>( std::floor( std::log2( std::max(texture.image.width, texture.image.height) ) ) ) + 1;
+        else texture.mip = std::max(static_cast<uint32_t>( std::floor( std::log2( std::max(texture.image.width, texture.image.height) ) ) ) + 1, maxMipLevels);
+        VkDeviceSize imageSize = width * height * 4;
+        
+        if (!pixels) throw std::runtime_error("createImage() failed to load image!");
+        
+        Buffer stagingBuffer;
+        createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,stagingBuffer.buffer, stagingBuffer.memory.memory);
+        
+        void* data;
+        vkMapMemory(device, stagingBuffer.memory.memory, 0, imageSize, 0, &data);
+            memcpy(data, pixels, imageSize);
+        vkUnmapMemory(device, stagingBuffer.memory.memory);
+        
+        stbi_image_free(pixels);
+        
+        createImage(texture.image.width, texture.image.height, texture.mip, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture.image.image,texture.image.memory.memory);
+        
+        transitionImageLayout(texture.image.image, texture.mip, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        copyBufferToImage(stagingBuffer.buffer, texture.image.image, width, height);
+        generateMipmaps(texture.image.image, VK_FORMAT_R8G8B8A8_SRGB, width, height, texture.mip);
+        
+        texture.image.view = createImageView(texture.image.image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture.mip);
+        
+        VkSamplerCreateInfo samplerInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.mipLodBias = 0;
+        samplerInfo.anisotropyEnable = anisotropyEnable;
+        samplerInfo.maxAnisotropy = anisotropyEnable ? 16 : 0;
+        samplerInfo.compareEnable = false;
+        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+        samplerInfo.minLod = 0;
+        samplerInfo.maxLod = static_cast<float>(texture.mip);
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
+        samplerInfo.unnormalizedCoordinates = false;
+        if (vkCreateSampler(device, &samplerInfo, nullptr, &texture.sampler) != VK_SUCCESS) throw std::runtime_error("createImage(1) failed!");
+        
+        freeBuffer(stagingBuffer);
+        
+        return texture;
+    }
     
 #pragma mark -
 #pragma mark Command buffer
@@ -614,46 +818,6 @@ namespace mh
         
         commandBuffers.resize(framebuffer.size());
         if (vkAllocateCommandBuffers(device, &allocateInfo, commandBuffers.data()) != VK_SUCCESS) throw std::runtime_error("createCommandPool() failed!");
-        
-        /*for (int i = 0; i < framebuffer.size(); ++i)
-        {
-            VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-            beginInfo.pInheritanceInfo = nullptr;
-            
-            /// Begin DRAW
-            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
-                throw std::runtime_error("vkBeginCommandBuffer() failed!");
-            
-            std::vector<VkClearValue> clearValues(2);
-            clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-            clearValues[1].depthStencil = { 1.f, 0 };
-            VkRenderPassBeginInfo renderPassInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-            renderPassInfo.renderPass = renderPass;
-            renderPassInfo.framebuffer = framebuffer[i];
-            renderPassInfo.renderArea.offset = { 0, 0 };
-            renderPassInfo.renderArea.extent = swapChainProps.extent;
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-            
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-            
-                mesh.draw(commandBuffers[i], i);
-            
-                vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-                
-                VkDeviceSize offset = 0;
-                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, &offset);
-                vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
-                
-                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
-            
-            vkCmdEndRenderPass(commandBuffers[i]);
-            
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
-               throw std::runtime_error("vkEndCommandBuffer() failed!");
-            /// End DRAW
-        }*/
     }
 
     VkCommandBuffer Context::beginSingleTimeCommands()
@@ -712,15 +876,6 @@ namespace mh
             renderPassInfo.pClearValues = clearValues.data();
             
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-            
-                /*vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-                
-                VkDeviceSize offset = 0;
-                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, &offset);
-                vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
-                
-                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);*/
         }
     }
     void Context::endRecord()
@@ -1038,22 +1193,24 @@ namespace mh
 #pragma mark -
 #pragma mark Draw
 
-    void Context::draw()
+    uint32_t Context::beginDraw()
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-        
+               
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
-        
+
         if (result == VK_ERROR_OUT_OF_DATE_KHR) throw exceptions::VK_ERROR_OUT_OF_DATE_KHR();
         else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) throw std::runtime_error("vkAcquireNextImageKHR() failed!");
-        
+
         if (imagesInFlight[imageIndex] != VK_NULL_HANDLE)
-            vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+           vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
         imagesInFlight[imageIndex] = inFlightFences[currentFrame];
         
-        // updateUniformBuffers(imageIndex);
-        
+        return imageIndex;
+    }
+    void Context::endDraw(const uint32_t& imageIndex)
+    {
         VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = &imageAvailableSemaphore[currentFrame];
@@ -1076,12 +1233,12 @@ namespace mh
         presentInfo.pImageIndices = &imageIndex;
         presentInfo.pResults = nullptr;
         
-        result = vkQueuePresentKHR(presentQueue, &presentInfo);
+        VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
         
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) throw exceptions::VK_ERROR_OUT_OF_DATE_KHR();
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) throw exceptions::VK_ERROR_OUT_OF_DATE_KHR();
         else if (result != VK_SUCCESS) throw std::runtime_error("vkQueuePresentKHR() failed!");
         
-        currentFrame = (currentFrame + 1) % mhs::MAX_FRAMES_IN_FLIGHT;
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
 }

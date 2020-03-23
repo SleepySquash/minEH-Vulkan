@@ -18,6 +18,7 @@
 
 #include "Config.hpp"
 #include "Static.hpp"
+#include "Vertex.hpp"
 
 namespace mh
 {
@@ -28,12 +29,13 @@ namespace mh
     struct Allocation
     {
         VkDeviceMemory memory = VK_NULL_HANDLE;
-        uint32_t memoryOffset = 0;
+        uint32_t offset = 0;
     };
 
     struct Buffer
     {
         VkBuffer buffer = VK_NULL_HANDLE;
+        uint32_t offset = 0;
         Allocation memory;
     };
 
@@ -59,9 +61,25 @@ namespace mh
         std::vector<VkDescriptorSet> sets = { VK_NULL_HANDLE };
     };
 
+    template<typename T> struct Model
+    {
+        std::vector<Vertex<T>> vertices;
+        std::vector<uint32_t> indices;
+        T position{ 0.f }, rotation{ 0.f }, scale{ 1.f };
+    };
+
+    struct CameraBufferObject { glm::mat4 view, proj; };
+    template<typename T> struct UBO
+    {
+        uint32_t dirty = 0;
+        std::vector<Buffer> buffers;
+        T model;
+    };
+
     struct SwapChainProperties
     {
         VkExtent2D extent;
+        float aspect;
         VkSurfaceFormatKHR format;
         uint32_t images;
     };
@@ -79,8 +97,9 @@ namespace mh
     
     std::pair<std::optional<uint32_t>, std::optional<uint32_t>> findQueueFamilies(const VkPhysicalDevice& d, const VkSurfaceKHR& surface);
     VkSampleCountFlagBits getMaxUsableSampleCount();
-    std::vector<const char*> getRequiredExtensions();
+    std::vector<const char*> getRequiredExtensions(const bool& getRequiredExtensions);
     std::vector<char> loadFileInBuffer(const std::string& filename);
+    void loadModel(const std::string& MODEL_NAME, std::vector<Vertex<glm::vec3>>& vertices, std::vector<uint32_t>& indices);
     
     bool hasStencilComponent(VkFormat format);
 }

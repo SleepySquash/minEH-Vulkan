@@ -27,13 +27,13 @@ namespace mh
         
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str())) throw std::runtime_error("loadModel() failed: " + warn + err);
         
-        std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
+        std::unordered_map<Vertex<glm::vec3>, uint32_t> uniqueVertices = {};
         
         for (const auto& shape : shapes)
         {
             for (const auto& index : shape.mesh.indices)
             {
-                Vertex vertex;
+                Vertex<glm::vec3> vertex;
                 
                 vertex.pos = {
                     attrib.vertices[3 * index.vertex_index + 0],
@@ -41,13 +41,11 @@ namespace mh
                     attrib.vertices[3 * index.vertex_index + 2]
                 };
 
-                vertex.texCoords = {
+                vertex.uv = {
                           attrib.texcoords[2 * index.texcoord_index + 0],
                     1.f - attrib.texcoords[2 * index.texcoord_index + 1]
                 };
 
-                vertex.col = { 1.0f, 1.0f, 1.0f };
-                
                 if (uniqueVertices.count(vertex) == 0) {
                     uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
                     vertices.push_back(vertex); }

@@ -7,9 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DD252DBB2422955D006494F9 /* Drawable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD252DB92422955D006494F9 /* Drawable.cpp */; };
+		DD252DBE24229566006494F9 /* Mesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD252DBC24229566006494F9 /* Mesh2D.cpp */; };
+		DD252DC124229570006494F9 /* Mesh3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD252DBF24229570006494F9 /* Mesh3D.cpp */; };
+		DD252DC42422957B006494F9 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD252DC22422957B006494F9 /* Camera.cpp */; };
+		DD252DC72423809A006494F9 /* Clock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD252DC52423809A006494F9 /* Clock.cpp */; };
 		DD3450BE2418D24400F329F3 /* Vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD3450BC2418D24400F329F3 /* Vertex.cpp */; };
-		DD3450C1241978B100F329F3 /* Mesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD3450BF241978B100F329F3 /* Mesh2D.cpp */; };
-		DD3450C4241A469700F329F3 /* Vulkan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD3450C2241A469700F329F3 /* Vulkan.cpp */; };
 		DD3450C8241A47DE00F329F3 /* Static.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD3450C6241A47DE00F329F3 /* Static.cpp */; };
 		DD6A50C9241D528F00CC4660 /* Window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD6A50C7241D528F00CC4660 /* Window.cpp */; };
 		DD6A50CD241EBB3700CC4660 /* Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD6A50CB241EBB3700CC4660 /* Event.cpp */; };
@@ -24,6 +27,8 @@
 		DDDB55E8240A6FA000C9A8A9 /* libvulkan.1.2.131.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DDDB55E3240A6B9200C9A8A9 /* libvulkan.1.2.131.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DDDB55EA240A6FC500C9A8A9 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DDDB55E9240A6FC500C9A8A9 /* libvulkan.1.dylib */; };
 		DDDB55EB240A6FCB00C9A8A9 /* libvulkan.1.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DDDB55E9240A6FC500C9A8A9 /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		DDE4996C2428D319005D0C06 /* CameraController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDE4996A2428D319005D0C06 /* CameraController.cpp */; };
+		DDE4996F242922AD005D0C06 /* Mesh1D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDE4996D242922AD005D0C06 /* Mesh1D.cpp */; };
 		DDF99299241CEE81002194B7 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDF99297241CEE81002194B7 /* Engine.cpp */; };
 		DDF9929F241D365E002194B7 /* ObjectContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDF9929D241D365E002194B7 /* ObjectContext.cpp */; };
 		DDF992A2241D3674002194B7 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDF992A0241D3674002194B7 /* Context.cpp */; };
@@ -57,12 +62,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DD252DB92422955D006494F9 /* Drawable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Drawable.cpp; sourceTree = "<group>"; };
+		DD252DBA2422955D006494F9 /* Drawable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Drawable.hpp; sourceTree = "<group>"; };
+		DD252DBC24229566006494F9 /* Mesh2D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Mesh2D.cpp; sourceTree = "<group>"; };
+		DD252DBD24229566006494F9 /* Mesh2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Mesh2D.hpp; sourceTree = "<group>"; };
+		DD252DBF24229570006494F9 /* Mesh3D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Mesh3D.cpp; sourceTree = "<group>"; };
+		DD252DC024229570006494F9 /* Mesh3D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Mesh3D.hpp; sourceTree = "<group>"; };
+		DD252DC22422957B006494F9 /* Camera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Camera.cpp; sourceTree = "<group>"; };
+		DD252DC32422957B006494F9 /* Camera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Camera.hpp; sourceTree = "<group>"; };
+		DD252DC52423809A006494F9 /* Clock.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Clock.cpp; sourceTree = "<group>"; };
+		DD252DC62423809A006494F9 /* Clock.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Clock.hpp; sourceTree = "<group>"; };
 		DD3450BC2418D24400F329F3 /* Vertex.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Vertex.cpp; sourceTree = "<group>"; };
 		DD3450BD2418D24400F329F3 /* Vertex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vertex.hpp; sourceTree = "<group>"; };
-		DD3450BF241978B100F329F3 /* Mesh2D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Mesh2D.cpp; sourceTree = "<group>"; };
-		DD3450C0241978B100F329F3 /* Mesh2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Mesh2D.hpp; sourceTree = "<group>"; };
-		DD3450C2241A469700F329F3 /* Vulkan.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Vulkan.cpp; sourceTree = "<group>"; };
-		DD3450C3241A469700F329F3 /* Vulkan.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vulkan.hpp; sourceTree = "<group>"; };
 		DD3450C6241A47DE00F329F3 /* Static.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Static.cpp; sourceTree = "<group>"; };
 		DD3450C7241A47DE00F329F3 /* Static.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Static.hpp; sourceTree = "<group>"; };
 		DD6A50C5241D4D8800CC4660 /* Config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
@@ -82,6 +93,10 @@
 		DDDB55E0240A6A7200C9A8A9 /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../../../usr/local/Cellar/glfw/3.3/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
 		DDDB55E3240A6B9200C9A8A9 /* libvulkan.1.2.131.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.2.131.dylib; path = ../../../vulkan/macOS/lib/libvulkan.1.2.131.dylib; sourceTree = "<group>"; };
 		DDDB55E9240A6FC500C9A8A9 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../vulkan/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
+		DDE4996A2428D319005D0C06 /* CameraController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CameraController.cpp; sourceTree = "<group>"; };
+		DDE4996B2428D319005D0C06 /* CameraController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CameraController.hpp; sourceTree = "<group>"; };
+		DDE4996D242922AD005D0C06 /* Mesh1D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Mesh1D.cpp; sourceTree = "<group>"; };
+		DDE4996E242922AD005D0C06 /* Mesh1D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Mesh1D.hpp; sourceTree = "<group>"; };
 		DDF99297241CEE81002194B7 /* Engine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Engine.cpp; sourceTree = "<group>"; };
 		DDF99298241CEE81002194B7 /* Engine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Engine.hpp; sourceTree = "<group>"; };
 		DDF9929D241D365E002194B7 /* ObjectContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectContext.cpp; sourceTree = "<group>"; };
@@ -106,15 +121,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		DD3450C5241A47B800F329F3 /* Engine */ = {
+		DD252DB824229541006494F9 /* Drawable */ = {
 			isa = PBXGroup;
 			children = (
-				DD3450C2241A469700F329F3 /* Vulkan.cpp */,
-				DD3450C3241A469700F329F3 /* Vulkan.hpp */,
-				DD3450BF241978B100F329F3 /* Mesh2D.cpp */,
-				DD3450C0241978B100F329F3 /* Mesh2D.hpp */,
+				DD252DC22422957B006494F9 /* Camera.cpp */,
+				DD252DC32422957B006494F9 /* Camera.hpp */,
+				DDE4996A2428D319005D0C06 /* CameraController.cpp */,
+				DDE4996B2428D319005D0C06 /* CameraController.hpp */,
+				DD252DB92422955D006494F9 /* Drawable.cpp */,
+				DD252DBA2422955D006494F9 /* Drawable.hpp */,
+				DDE4996D242922AD005D0C06 /* Mesh1D.cpp */,
+				DDE4996E242922AD005D0C06 /* Mesh1D.hpp */,
+				DD252DBC24229566006494F9 /* Mesh2D.cpp */,
+				DD252DBD24229566006494F9 /* Mesh2D.hpp */,
+				DD252DBF24229570006494F9 /* Mesh3D.cpp */,
+				DD252DC024229570006494F9 /* Mesh3D.hpp */,
 			);
-			path = Engine;
+			path = Drawable;
 			sourceTree = "<group>";
 		};
 		DD987745240C5CA900B97B03 /* Resources */ = {
@@ -150,7 +173,6 @@
 			children = (
 				DDDB55D2240A667A00C9A8A9 /* main.cpp */,
 				DDF9929B241D0237002194B7 /* minEH */,
-				DD3450C5241A47B800F329F3 /* Engine */,
 				DDDB55DA240A671400C9A8A9 /* Supporting Files */,
 			);
 			path = VulkanTesting2;
@@ -182,8 +204,6 @@
 			children = (
 				DD3450C6241A47DE00F329F3 /* Static.cpp */,
 				DD3450C7241A47DE00F329F3 /* Static.hpp */,
-				DD3450BC2418D24400F329F3 /* Vertex.cpp */,
-				DD3450BD2418D24400F329F3 /* Vertex.hpp */,
 				DDF9929C241D0242002194B7 /* Engine */,
 			);
 			path = minEH;
@@ -195,6 +215,8 @@
 				DD6A50C5241D4D8800CC4660 /* Config.hpp */,
 				DDF992A3241D37D8002194B7 /* Vulkan.cpp */,
 				DDF992A4241D37D8002194B7 /* Vulkan.hpp */,
+				DD3450BC2418D24400F329F3 /* Vertex.cpp */,
+				DD3450BD2418D24400F329F3 /* Vertex.hpp */,
 				DD6A50CB241EBB3700CC4660 /* Event.cpp */,
 				DD6A50CC241EBB3700CC4660 /* Event.hpp */,
 				DD6A50C7241D528F00CC4660 /* Window.cpp */,
@@ -203,6 +225,9 @@
 				DDF992A1241D3674002194B7 /* Context.hpp */,
 				DDF9929D241D365E002194B7 /* ObjectContext.cpp */,
 				DDF9929E241D365E002194B7 /* ObjectContext.hpp */,
+				DD252DC52423809A006494F9 /* Clock.cpp */,
+				DD252DC62423809A006494F9 /* Clock.hpp */,
+				DD252DB824229541006494F9 /* Drawable */,
 				DDF99297241CEE81002194B7 /* Engine.cpp */,
 				DDF99298241CEE81002194B7 /* Engine.hpp */,
 			);
@@ -281,16 +306,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD3450C4241A469700F329F3 /* Vulkan.cpp in Sources */,
+				DD252DC42422957B006494F9 /* Camera.cpp in Sources */,
 				DD6A50C9241D528F00CC4660 /* Window.cpp in Sources */,
 				DDF992A2241D3674002194B7 /* Context.cpp in Sources */,
 				DDF99299241CEE81002194B7 /* Engine.cpp in Sources */,
 				DD3450C8241A47DE00F329F3 /* Static.cpp in Sources */,
 				DD3450BE2418D24400F329F3 /* Vertex.cpp in Sources */,
-				DD3450C1241978B100F329F3 /* Mesh2D.cpp in Sources */,
 				DDF992A5241D37D8002194B7 /* Vulkan.cpp in Sources */,
+				DDE4996C2428D319005D0C06 /* CameraController.cpp in Sources */,
+				DD252DC124229570006494F9 /* Mesh3D.cpp in Sources */,
+				DD252DBE24229566006494F9 /* Mesh2D.cpp in Sources */,
 				DDF9929F241D365E002194B7 /* ObjectContext.cpp in Sources */,
+				DD252DBB2422955D006494F9 /* Drawable.cpp in Sources */,
 				DDDB55D3240A667A00C9A8A9 /* main.cpp in Sources */,
+				DDE4996F242922AD005D0C06 /* Mesh1D.cpp in Sources */,
+				DD252DC72423809A006494F9 /* Clock.cpp in Sources */,
 				DD6A50CD241EBB3700CC4660 /* Event.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

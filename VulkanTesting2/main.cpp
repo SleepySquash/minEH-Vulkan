@@ -11,7 +11,60 @@ using std::cout;
 using std::endl;
 
 #include <exception>
-#include <optional>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
+#define GLFW_INCLUDE_VULKAN
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+
+#include "minEH/Engine/Engine.hpp"
+
+int main()
+{
+    mh::Engine app;
+    try
+    {
+        app.Run();
+    }
+    catch(std::exception& ex) { cout << ex.what() << endl; }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*#include <optional>
 #include <fstream>
 #include <chrono>
 
@@ -35,12 +88,11 @@ using std::endl;
 #include "minEH/Static.hpp"
 #include "minEH/Vertex.hpp"
 #include "Engine/Mesh2D.hpp"
+#include "Engine/Vertex_obsolete.hpp"
 using namespace mh;
 
 const std::string TEXTURE_NAME = "Data/Textures/texture.jpg";
 const std::string MODEL_NAME;
-// const std::string TEXTURE_NAME = "Data/Textures/chalet.jpg";
-// const std::string MODEL_NAME = "Data/Models/chalet.obj";
 
 struct Application
 {
@@ -226,18 +278,18 @@ struct Application
     std::vector<VkFence> inFlightFences, imagesInFlight;
     size_t currentFrame = 0;
     
-    // std::vector<Vertex> vertices;
+    // std::vector<mh_obsolete::Vertex> vertices;
     // std::vector<uint32_t> indices;
-    std::vector<Vertex> vertices = {
-        { { -0.5f,  -0.5f,   0.0f }, { 1.0f,  0.0f,  0.0f }, { 1.0f,  0.0f } },
-        { {  0.5f,  -0.5f,   0.0f }, { 0.0f,  1.0f,  0.0f }, { 0.0f,  0.0f } },
-        { {  0.5f,   0.5f,   0.0f }, { 0.0f,  0.0f,  1.0f }, { 0.0f,  1.0f } },
-        { { -0.5f,   0.5f,   0.0f }, { 1.0f,  1.0f,  1.0f }, { 1.0f,  1.0f } },
+    std::vector<mh_obsolete::Vertex> vertices = {
+        { { -0.5f,  -0.5f,   0.0f }, { 1.f, 1.f, 1.f }, { 1.0f,  0.0f } },
+        { {  0.5f,  -0.5f,   0.0f }, { 1.f, 1.f, 1.f }, { 0.0f,  0.0f } },
+        { {  0.5f,   0.5f,   0.0f }, { 1.f, 1.f, 1.f }, { 0.0f,  1.0f } },
+        { { -0.5f,   0.5f,   0.0f }, { 1.f, 1.f, 1.f }, { 1.0f,  1.0f } },
         
-        { { -0.5f,  -0.5f,  -0.5f }, { 1.0f,  0.0f,  0.0f }, { 1.0f,  0.0f } },
-        { {  0.5f,  -0.5f,  -0.5f }, { 0.0f,  1.0f,  0.0f }, { 0.0f,  0.0f } },
-        { {  0.5f,   0.5f,  -0.5f }, { 0.0f,  0.0f,  1.0f }, { 0.0f,  1.0f } },
-        { { -0.5f,   0.5f,  -0.5f }, { 1.0f,  1.0f,  1.0f }, { 1.0f,  1.0f } }
+        { { -0.5f,  -0.5f,  -0.5f }, { 1.f, 1.f, 1.f }, { 1.0f,  0.0f } },
+        { {  0.5f,  -0.5f,  -0.5f }, { 1.f, 1.f, 1.f }, { 0.0f,  0.0f } },
+        { {  0.5f,   0.5f,  -0.5f }, { 1.f, 1.f, 1.f }, { 0.0f,  1.0f } },
+        { { -0.5f,   0.5f,  -0.5f }, { 1.f, 1.f, 1.f }, { 1.0f,  1.0f } }
     };
     std::vector<uint32_t> indices = {
         0, 1, 2,   2, 3, 0,
@@ -595,11 +647,11 @@ struct Application
         vkGetPhysicalDeviceProperties(physicalDevice, &properties);
         
         VkSampleCountFlags counts = properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
-        /*if (counts & VK_SAMPLE_COUNT_64_BIT) return VK_SAMPLE_COUNT_64_BIT;
+        if (counts & VK_SAMPLE_COUNT_64_BIT) return VK_SAMPLE_COUNT_64_BIT;
         if (counts & VK_SAMPLE_COUNT_32_BIT) return VK_SAMPLE_COUNT_32_BIT;
         if (counts & VK_SAMPLE_COUNT_16_BIT) return VK_SAMPLE_COUNT_16_BIT;
         if (counts & VK_SAMPLE_COUNT_8_BIT) return VK_SAMPLE_COUNT_8_BIT;
-        if (counts & VK_SAMPLE_COUNT_4_BIT) return VK_SAMPLE_COUNT_4_BIT;*/
+        if (counts & VK_SAMPLE_COUNT_4_BIT) return VK_SAMPLE_COUNT_4_BIT;
         if (counts & VK_SAMPLE_COUNT_2_BIT) return VK_SAMPLE_COUNT_2_BIT;
         
         return VK_SAMPLE_COUNT_1_BIT;
@@ -1347,14 +1399,10 @@ struct Application
     
     void updateUniformBuffers(const uint32_t& imageIndex)
     {
-        /*static auto startTime = std::chrono::high_resolution_clock::now();
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();*/
-        
         UniformBufferObject ubo;
         // ubo.model = glm::rotate(glm::mat4(1.f), glm::radians(20.f) * time, glm::vec3(0.f, 0.f, 1.f));
         ubo.model = glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f));
-        ubo.view = glm::lookAt(cameraPosition, cameraPosition - cameraDirection /*+ glm::vec3(0.001f, 0.001f, -1.f)*/, cameraUp);
+        ubo.view = glm::lookAt(cameraPosition, cameraPosition - cameraDirection, cameraUp);
         ubo.proj = glm::perspective(glm::radians(45.f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 100.0f);
         ubo.proj[1][1] *= -1;
         
@@ -1446,24 +1494,24 @@ struct Application
         
         VkVertexInputBindingDescription vBindingDescription = {};
         vBindingDescription.binding = 0;
-        vBindingDescription.stride = sizeof(Vertex);
+        vBindingDescription.stride = sizeof(mh_obsolete::Vertex);
         vBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
         
         std::vector<VkVertexInputAttributeDescription> vAttributeDescription(3);
         vAttributeDescription[0].binding = 0;
         vAttributeDescription[0].location = 0;
         vAttributeDescription[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-        vAttributeDescription[0].offset = offsetof(Vertex, pos);
+        vAttributeDescription[0].offset = offsetof(mh_obsolete::Vertex, pos);
 
         vAttributeDescription[1].binding = 0;
         vAttributeDescription[1].location = 1;
         vAttributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        vAttributeDescription[1].offset = offsetof(Vertex, col);
+        vAttributeDescription[1].offset = offsetof(mh_obsolete::Vertex, col);
         
         vAttributeDescription[2].binding = 0;
         vAttributeDescription[2].location = 2;
         vAttributeDescription[2].format = VK_FORMAT_R32G32_SFLOAT;
-        vAttributeDescription[2].offset = offsetof(Vertex, texCoords);
+        vAttributeDescription[2].offset = offsetof(mh_obsolete::Vertex, texCoords);
         
         VkPipelineVertexInputStateCreateInfo inputStateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
         inputStateInfo.vertexBindingDescriptionCount = 1;
@@ -1606,13 +1654,13 @@ struct Application
         
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_NAME.c_str())) throw std::runtime_error("loadModel() failed: " + warn + err);
         
-        std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
+        std::unordered_map<mh_obsolete::Vertex, uint32_t> uniqueVertices = {};
         
         for (const auto& shape : shapes)
         {
             for (const auto& index : shape.mesh.indices)
             {
-                Vertex vertex;
+                mh_obsolete::Vertex vertex;
                 
                 vertex.pos = {
                     attrib.vertices[3 * index.vertex_index + 0],
@@ -1908,19 +1956,4 @@ struct Application
         
         currentFrame = (currentFrame + 1) % mhs::MAX_FRAMES_IN_FLIGHT;
     }
-};
-
-
-
-#include "minEH/Engine/Engine.hpp"
-
-int main()
-{
-    mh::Engine app;
-    try
-    {
-        app.Run();
-    }
-    catch(std::exception& ex) { cout << ex.what() << endl; }
-    return 0;
-}
+};*/

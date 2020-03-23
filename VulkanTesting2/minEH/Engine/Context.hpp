@@ -22,13 +22,13 @@ using std::endl;
 #include <unordered_map>
 
 #include <vulkan/vulkan.h>
-#include <glm/glm.hpp>
+#include <glm/fwd.hpp>
 
 #include "../Static.hpp"
-#include "../Vertex.hpp"
 
 #include "Config.hpp"
 #include "Vulkan.hpp"
+#include "Vertex.hpp"
 #include "Window.hpp"
 
 namespace mh
@@ -44,6 +44,11 @@ namespace mh
 
     struct Context
     {
+        int MAX_FRAMES_IN_FLIGHT = 2;
+        std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+        bool enableValidationLayers = true;
+        
+        
         VkInstance instance = VK_NULL_HANDLE;
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkPhysicalDevice GPU = VK_NULL_HANDLE;
@@ -53,8 +58,6 @@ namespace mh
         
         Window* window = nullptr;
         WindowSize lastSize;
-        bool framebufferIconified = false;
-        bool framebufferResized = false;
         
         bool anisotropyEnable = false;
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -76,6 +79,7 @@ namespace mh
         std::vector<VkFence> inFlightFences = { VK_NULL_HANDLE }, imagesInFlight = { VK_NULL_HANDLE };
         size_t currentFrame = 0;
         
+    public:
 #pragma mark -
 #pragma mark Init/Destroy
         
@@ -118,7 +122,7 @@ namespace mh
         void createFramebuffers();
         
 #pragma mark -
-#pragma mark Semaphores
+#pragma mark Semaphores/Pipelines/Shaders
         
         void createSemaphores();
         
@@ -126,6 +130,10 @@ namespace mh
         // descriptors
         // graphicsPipeline and draw submits
         VkShaderModule loadShader(const std::string& path);
+        
+        std::pair<VkPipeline, VkPipelineLayout> generateDefaultPipeline(VkShaderModule& vertexShader, VkShaderModule& fragmentShader, std::vector<VkVertexInputAttributeDescription>& vAttributeDescription, VkVertexInputBindingDescription& vBindingDescription, Descriptor* descriptor, bool depthEnabled, const VkPolygonMode& polygonMode, const VkCullModeFlags& cullMode, const VkFrontFace& frontFace);
+        void generateDefaultVertexAndIndexBuffers(const VkDeviceSize &bufferSizeV, Buffer &vertexBuffer, const void* vertexData, const VkDeviceSize &bufferSizeI, Buffer &indexBuffer, const void* indexData);
+        Texture generateTexture(const std::string& textureName, uint32_t maxMipLevels);
         
 #pragma mark -
 #pragma mark Command buffer
@@ -172,7 +180,8 @@ namespace mh
 #pragma mark -
 #pragma mark Draw
         
-        void draw();
+        uint32_t beginDraw();
+        void endDraw(const uint32_t& imageIndex);
         
     };
 }

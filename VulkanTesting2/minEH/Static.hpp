@@ -15,9 +15,7 @@ namespace mh
 {
     struct mhs
     {
-        static const std::vector<const char*> validationLayers;
-        static const bool enableValidationLayers;
-        static const int MAX_FRAMES_IN_FLIGHT;
+        
     };
 }
 using mh::mhs;
