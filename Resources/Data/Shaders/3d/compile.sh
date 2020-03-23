@@ -1,0 +1,3 @@
+/Users/mayday/Developer/vulkan/macOS/bin/glslc "/Users/mayday/Developer/XCode/C++/VulkanTesting2/Resources/Data/Shaders/3d/mesh.vert" -o "/Users/mayday/Developer/XCode/C++/VulkanTesting2/Resources/Data/Shaders/spv/mesh.vert.spv"
+
+/Users/mayday/Developer/vulkan/macOS/bin/glslc "/Users/mayday/Developer/XCode/C++/VulkanTesting2/Resources/Data/Shaders/3d/mesh.frag" -o "/Users/mayday/Developer/XCode/C++/VulkanTesting2/Resources/Data/Shaders/spv/mesh.frag.spv"
